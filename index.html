@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deccansoft Live Ads</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f5f2; --surface: #fcfcfb; --surface-2: #f0efec; --border: #e4e2dc;
+    --text: #0b0b0b; --text-2: #52514e; --text-3: #7a7973;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+    --grid: #e4e2dc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --border: #33332f;
+      --text: #ffffff; --text-2: #c3c2b7; --text-3: #8f8e86;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --grid: #33332f;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --border: #33332f;
+    --text: #ffffff; --text-2: #c3c2b7; --text-3: #8f8e86;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --grid: #33332f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 64px; }
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 20px; }
+  h1 { font-size: 24px; letter-spacing: -0.02em; margin: 0; }
+  .sub { color: var(--text-2); margin: 2px 0 0; }
+  .meta { color: var(--text-3); font-size: 12px; text-align: right; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 18px; }
+  .filters button { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+  h2 { font-size: 15px; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  h2 small { font-weight: 400; color: var(--text-3); margin-left: 6px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .tile .k { color: var(--text-2); font-size: 12px; }
+  .tile .v { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .tile .h { color: var(--text-3); font-size: 12px; }
+  .notes { display: grid; gap: 8px; }
+  .note { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; border: 1px solid; }
+  .badge i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .note b { display: block; }
+  .note > div { min-width: 0; }
+  .note p { margin: 2px 0 0; color: var(--text-2); overflow-wrap: anywhere; }
+  .grp { min-width: 0; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 10px; }
+  .grp h3 { margin: 0 0 2px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .grp .url { color: var(--text-3); font-size: 12px; word-break: break-all; }
+  .kv { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 12px; margin-top: 12px; }
+  .kv div span { display: block; color: var(--text-3); font-size: 11px; }
+  .kv div strong { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--surface); }
+  th:first-child, td:first-child, th.l, td.l { text-align: left; }
+  tbody tr:hover { background: var(--surface-2); }
+  td.ad { display: flex; align-items: center; gap: 10px; }
+  td.ad img, td.ad .ph { width: 36px; height: 46px; object-fit: cover; border-radius: 4px; background: var(--surface-2); flex: none; }
+  td.ad div small { display: block; color: var(--text-3); font-size: 11px; }
+  .muted { color: var(--text-3); }
+  .status { font-size: 11px; color: var(--text-2); }
+  tfoot td { font-weight: 700; border-bottom: 0; }
+  .chart { width: 100%; height: 220px; display: block; }
+  .chart text { fill: var(--text-3); font-size: 11px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .tip { position: fixed; pointer-events: none; background: var(--text); color: var(--bg); padding: 6px 9px; border-radius: 6px; font-size: 12px; line-height: 1.4; z-index: 10; }
+  .funnel { display: grid; gap: 8px; margin-top: 6px; }
+  .fstep { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.1fr) 52px; gap: 10px; align-items: center; }
+  .flab { font-size: 13px; }
+  .flab small { display: block; color: var(--text-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .ftrack { min-width: 0; }
+  .fbar { height: 14px; border-radius: 0 4px 4px 0; min-width: 3px; }
+  .fpct { font-size: 12px; color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; }
+  .fhead { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1.1fr) 52px; gap: 10px; font-size: 11px; color: var(--text-3); margin-top: 14px; }
+  .fhead span:last-child { text-align: right; }
+  .fsum { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+  .fsum b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .fpage { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); font-size: 12px; color: var(--text-3); }
+  .fpage > span { display: block; margin-bottom: 6px; }
+  .fpage div { display: flex; justify-content: space-between; padding: 2px 0; color: var(--text-2); }
+  .fpage b { font-variant-numeric: tabular-nums; }
+  .frow { display: grid; grid-template-columns: 170px 1fr 70px; gap: 10px; align-items: center; }
+  .frow .lab small { display: block; color: var(--text-3); font-size: 11px; }
+  .bar { height: 18px; border-radius: 0 4px 4px 0; background: var(--s1); min-width: 2px; }
+  .frow .n { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  footer { margin-top: 40px; color: var(--text-3); font-size: 12px; }
+  @media (max-width: 560px) { .frow { grid-template-columns: 110px 1fr 50px; } .kv { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+
+<style>
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 var(--good); animation: pulse 2s infinite; }
+  .live.stale i { background: var(--warning); animation: none; }
+  .live.dead i { background: var(--critical); animation: none; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(12,163,12,.5); } 70% { box-shadow: 0 0 0 7px rgba(12,163,12,0); } 100% { box-shadow: 0 0 0 0 rgba(12,163,12,0); } }
+  @media (prefers-reduced-motion: reduce) { .live i { animation: none; } }
+  .tile .d { font-size: 12px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .up { color: var(--good); } .down { color: var(--critical); } .flat { color: var(--text-3); }
+  .err { display: none; margin-bottom: 14px; border-color: var(--critical); color: var(--critical); }
+  .bars rect { transition: opacity .15s; }
+  .bars rect:hover { opacity: .75; }
+  .today-cell { color: var(--text-3); font-size: 11px; display: block; }
+</style>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Deccansoft Home · Live</h1>
+      <p class="sub">Meta ads, pulled straight from the ad account every 5 minutes. Reporting starts <span id="start"></span>.</p>
+    </div>
+    <div class="meta">
+      <span class="live" id="live"><i></i><span id="ago">loading…</span></span><br>
+      <span id="stamp"></span>
+    </div>
+  </header>
+  <div class="card err" id="err"></div>
+  <div class="card err" id="cap"></div>
+
+  <h2>Today <small id="todayLabel"></small></h2>
+  <div class="tiles" id="todayTiles"></div>
+
+  <h2>Since <span id="start2"></span> <small>all days, today included</small></h2>
+  <div class="tiles" id="totalTiles"></div>
+
+  <h2>Quiz page vs Webinar page <small>since the start day · not a clean A/B: the quiz ad set optimises on Lead, the webinar ad set on CompleteRegistration</small></h2>
+  <div class="split" id="split"></div>
+
+  <h2>Per day <small>IST · today is a part-day</small></h2>
+  <div class="card">
+    <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Spend</span><span><i class="sw" style="background:var(--s3)"></i>Registrations</span><span><i class="sw" style="background:var(--s2)"></i>Leads</span></div>
+    <svg class="chart bars" id="daily"></svg>
+  </div>
+
+  <h2>Today by hour <small>spend per hour, IST</small></h2>
+  <div class="card"><svg class="chart bars" id="hourly" style="height:160px"></svg></div>
+
+  <h2>Ads <small>since the start day, with today underneath · click a heading to sort</small></h2>
+  <div class="card scroll"><table id="ads"></table></div>
+
+  <footer>Source: Meta Marketing API, ad account <span id="acct"></span>, read-only. Leads = Meta "lead" action, registrations = "complete_registration", clicks = link clicks, both attributed to the ads by Meta (default attribution). Meta revises the last ~48 hours as late conversions arrive.</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const SRC = location.hostname.endsWith("github.io")
+  ? "https://raw.githubusercontent.com/lenkasacademy-pixel/deccansoft-live/data/data.json"
+  : "data.json";
+const POLL_MS = 60 * 1000;
+let D = null, sortKey = "spend", sortDir = -1;
+
+const $ = id => document.getElementById(id);
+const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const inr2 = n => "₹" + n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const num = n => n.toLocaleString("en-IN");
+const per = (a, b) => b ? inr(a / b) : "–";
+const pct = (a, b) => b ? (100 * a / b).toFixed(1) + "%" : "–";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const dayLabel = d => new Date(d + "T00:00:00+05:30").toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
+
+async function load() {
+  try {
+    const r = await fetch(SRC + "?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    D = await r.json();
+    $("err").style.display = "none";
+    render();
+  } catch (e) {
+    $("err").style.display = "block";
+    $("err").textContent = "Could not load the latest numbers (" + e.message + "). Showing the last good copy; retrying every minute.";
+  }
+  tick();
+}
+
+function tick() {
+  if (!D) return;
+  const mins = Math.floor((Date.now() - new Date(D.generated)) / 60000);
+  $("ago").textContent = mins < 1 ? "updated just now" : `updated ${mins} min ago`;
+  $("live").className = "live" + (mins > 60 ? " dead" : mins > 20 ? " stale" : "");
+}
+
+function delta(now, before, lowerIsBetter) {
+  if (!before) return `<div class="d flat">yesterday –</div>`;
+  const ch = (now - before) / before, good = lowerIsBetter ? ch < 0 : ch > 0;
+  const cls = Math.abs(ch) < 0.005 ? "flat" : good ? "up" : "down";
+  return `<div class="d ${cls}">${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch * 100).toFixed(0)}% vs yesterday by ${String(D.yesterdaySoFar.untilHour).padStart(2, "0")}:00</div>`;
+}
+
+function tiles(el, m, y, full) {
+  const t = [
+    ["Spend", inr2(m.spend), y && delta(m.spend, y.spend)],
+    ["Registrations", num(m.regs), y ? delta(m.regs, y.regs) : `<div class="h">${per(m.spend, m.regs)} each</div>`],
+    ["Leads", num(m.leads), y ? delta(m.leads, y.leads) : `<div class="h">${per(m.spend, m.leads)} each</div>`],
+    ["Cost / registration", per(m.spend, m.regs), full ? `<div class="h">all of yesterday ${per(full.spend, full.regs)}</div>` : ""],
+    ["Link clicks", num(m.clicks), `<div class="h">CTR ${pct(m.clicks, m.impr)} · ${per(m.spend, m.clicks)} CPC</div>`],
+    ["Landing page views", num(m.lpv), `<div class="h">${pct(m.lpv, m.clicks)} of clicks</div>`],
+    ["Impressions", num(m.impr), `<div class="h">reach ${num(m.reach)}</div>`],
+  ];
+  $(el).innerHTML = t.map(([k, v, h]) => `<div class="card tile"><div class="k">${k}</div><div class="v">${v}</div>${h || ""}</div>`).join("");
+}
+
+function sum(rows, key) {
+  const o = { spend: 0, impr: 0, reach: 0, clicks: 0, lpv: 0, leads: 0, regs: 0 };
+  rows.forEach(r => { const m = key ? r[key] : r; for (const k in o) o[k] += m[k] || 0; });
+  return o;
+}
+
+function split() {
+  const groups = [["quiz", "Quiz page", "var(--s2)"], ["webinar", "Webinar page", "var(--s1)"]];
+  $("split").innerHTML = groups.map(([g, label, c]) => {
+    const rows = D.ads.filter(a => a.group === g);
+    if (!rows.length) return "";
+    const m = sum(rows), t = sum(rows, "today"), live = rows.filter(a => a.status === "ACTIVE").length;
+    return `<div class="card grp"><h3><i class="sw" style="background:${c}"></i>${label}</h3>
+      <div class="url">${rows.length} ads · ${live} active · today ${inr(t.spend)}, ${t.regs} regs, ${t.leads} leads</div>
+      <div class="kv">
+        <div><span>Spend</span><strong>${inr(m.spend)}</strong></div>
+        <div><span>Registrations</span><strong>${num(m.regs)}</strong></div>
+        <div><span>Leads</span><strong>${num(m.leads)}</strong></div>
+        <div><span>Cost / reg</span><strong>${per(m.spend, m.regs)}</strong></div>
+        <div><span>Cost / lead</span><strong>${per(m.spend, m.leads)}</strong></div>
+        <div><span>Page → reg</span><strong>${pct(m.regs, m.lpv)}</strong></div>
+        <div><span>Link clicks</span><strong>${num(m.clicks)}</strong></div>
+        <div><span>Page views</span><strong>${num(m.lpv)}</strong></div>
+        <div><span>CTR</span><strong>${pct(m.clicks, m.impr)}</strong></div>
+      </div></div>`;
+  }).join("");
+}
+
+// Grouped bars: spend on its own scale (left), counts on a shared scale (right).
+function barChart(svg, rows, label, series) {
+  const W = svg.clientWidth || 600, H = svg.clientHeight || 220, pad = { l: 44, r: 30, t: 10, b: 22 };
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b, n = rows.length || 1, bw = iw / n;
+  const maxS = Math.max(1, ...rows.map(r => r.spend));
+  const maxC = Math.max(1, ...rows.flatMap(r => series.slice(1).map(s => r[s.k])));
+  let out = "";
+  [0, .5, 1].forEach(f => {
+    const y = pad.t + ih * (1 - f);
+    out += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}" stroke="var(--grid)"/>`;
+    out += `<text x="${pad.l - 6}" y="${y + 4}" text-anchor="end">${maxS < 20 ? inr2(maxS * f) : inr(maxS * f)}</text>`;
+    if (series.length > 1) out += `<text x="${W - pad.r + 6}" y="${y + 4}">${Math.round(maxC * f)}</text>`;
+  });
+  const every = Math.ceil(n / Math.max(1, Math.floor(iw / 44)));
+  rows.forEach((r, i) => {
+    const x0 = pad.l + i * bw, inner = bw * 0.78, w = inner / series.length;
+    series.forEach((s, j) => {
+      const v = r[s.k], h = ih * v / (j === 0 ? maxS : maxC);
+      out += `<rect x="${x0 + bw * 0.11 + j * w}" y="${pad.t + ih - h}" width="${Math.max(1, w - 1)}" height="${Math.max(0, h)}" rx="2" fill="${s.c}" data-i="${i}"/>`;
+    });
+    if (i % every === 0) out += `<text x="${x0 + bw / 2}" y="${H - 6}" text-anchor="middle">${label(r)}</text>`;
+  });
+  svg.innerHTML = out;
+  svg.onmousemove = e => {
+    const i = e.target.dataset && e.target.dataset.i;
+    if (i === undefined) return ($("tip").hidden = true);
+    const r = rows[i];
+    $("tip").innerHTML = `<b>${label(r, true)}</b><br>${inr2(r.spend)} spend<br>${r.regs} regs · ${r.leads} leads<br>${num(r.clicks)} clicks · ${num(r.impr)} impr`;
+    Object.assign($("tip").style, { left: Math.min(e.clientX + 12, innerWidth - 180) + "px", top: e.clientY + 12 + "px" });
+    $("tip").hidden = false;
+  };
+  svg.onmouseleave = () => ($("tip").hidden = true);
+}
+
+const COLS = [
+  ["name", "Ad", "l"], ["status", "Status", "l"], ["spend", "Spend"], ["regs", "Regs"], ["leads", "Leads"],
+  ["cpr", "Cost/reg"], ["clicks", "Clicks"], ["lpv", "Page views"], ["ctr", "CTR"], ["impr", "Impr."],
+];
+function adsTable() {
+  const rows = D.ads.map(a => ({ ...a, cpr: a.regs ? a.spend / a.regs : Infinity, ctr: a.impr ? a.clicks / a.impr : 0 }));
+  rows.sort((a, b) => {
+    const x = a[sortKey], y = b[sortKey];
+    return (typeof x === "string" ? x.localeCompare(y) : x - y) * sortDir;
+  });
+  const td = (v, t) => `<td>${v}${t !== undefined ? `<span class="today-cell">${t}</span>` : ""}</td>`;
+  const tot = sum(D.ads), tt = sum(D.ads, "today");
+  $("ads").innerHTML = `<thead><tr>${COLS.map(([k, l, c]) => `<th class="${c || ""}" data-k="${k}">${l}${k === sortKey ? (sortDir < 0 ? " ↓" : " ↑") : ""}</th>`).join("")}</tr></thead>
+  <tbody>${rows.map(a => `<tr>
+    <td class="ad">${a.img ? `<img src="${esc(a.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="ph"></span>`}<div>${esc(a.name)}<small>${esc(a.adset)}</small></div></td>
+    <td class="l status">${esc(a.status.toLowerCase().replace(/_/g, " "))}</td>
+    ${td(inr(a.spend), a.today.spend ? inr(a.today.spend) : "·")}
+    ${td(a.regs, a.today.regs || "·")}
+    ${td(a.leads, a.today.leads || "·")}
+    ${td(a.regs ? inr(a.spend / a.regs) : "–")}
+    ${td(num(a.clicks), a.today.clicks || "·")}
+    ${td(num(a.lpv))}
+    ${td(pct(a.clicks, a.impr))}
+    ${td(num(a.impr))}
+  </tr>`).join("")}</tbody>
+  <tfoot><tr><td class="l">All ads</td><td></td>${td(inr(tot.spend), inr(tt.spend) + " today")}${td(tot.regs, tt.regs)}${td(tot.leads, tt.leads)}${td(per(tot.spend, tot.regs))}${td(num(tot.clicks))}${td(num(tot.lpv))}${td(pct(tot.clicks, tot.impr))}${td(num(tot.impr))}</tr></tfoot>`;
+  $("ads").querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    sortDir = k === sortKey ? -sortDir : (k === "name" || k === "status" || k === "cpr" ? 1 : -1);
+    sortKey = k; adsTable();
+  });
+}
+
+function render() {
+  const gen = new Date(D.generated);
+  $("stamp").textContent = gen.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" }) + " IST";
+  $("start").textContent = $("start2").textContent = dayLabel(D.startDay);
+  $("acct").textContent = D.account.id;
+  $("todayLabel").textContent = gen.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short", timeZone: "Asia/Kolkata" }) + " · so far · compared with yesterday up to the same hour · yesterday in full: " + inr(D.yesterday.spend) + ", " + D.yesterday.regs + " regs, " + D.yesterday.leads + " leads";
+  const L = D.account.spendLimit, c = $("cap");
+  if (L && L.left < 3000) {
+    c.style.display = "block";
+    c.innerHTML = `<b>Account spending limit ${L.left < 50 ? "reached" : "almost reached"}.</b> ${inr2(L.left)} left of the ${inr(L.cap)} limit, so ads ${L.left < 50 ? "have stopped delivering" : "will stop soon"}. Raise or reset it in Ads Manager → Billing → Account spending limit.`;
+  } else c.style.display = "none";
+  tiles("todayTiles", D.today, D.yesterdaySoFar, D.yesterday);
+  tiles("totalTiles", D.total);
+  split();
+  const S = [{ k: "spend", c: "var(--s1)" }, { k: "regs", c: "var(--s3)" }, { k: "leads", c: "var(--s2)" }];
+  barChart($("daily"), D.daily, (r, long) => long ? dayLabel(r.day) + (r === D.daily[D.daily.length - 1] ? " (so far)" : "") : dayLabel(r.day), S);
+  const hours = Array.from({ length: 24 }, (_, h) => D.hourly.find(x => x.hour === h) || { hour: h, spend: 0, impr: 0, clicks: 0, leads: 0, regs: 0 });
+  barChart($("hourly"), hours, r => String(r.hour).padStart(2, "0") + ":00", [{ k: "spend", c: "var(--s1)" }]);
+  adsTable();
+}
+
+load();
+setInterval(load, POLL_MS);
+setInterval(tick, 15000);
+addEventListener("resize", () => D && render());
+document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && load());
+</script>
+</body>
+</html>

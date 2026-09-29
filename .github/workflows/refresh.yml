@@ -1,0 +1,34 @@
+name: Refresh ad data
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # GitHub runs this on a best-effort basis; expect 5-15 min gaps
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pull from Meta
+        env:
+          META_TOKEN: ${{ secrets.META_TOKEN }}
+        run: python3 fetch.py
+      # data.json lives alone on the `data` branch, force-pushed as a single commit:
+      # no history piles up and main (the Pages site) is never rebuilt.
+      - name: Publish data.json to the data branch
+        run: |
+          mkdir out && mv data.json out/ && cd out
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json && git commit -q -m "Ad data $(date -u +%FT%TZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" data
