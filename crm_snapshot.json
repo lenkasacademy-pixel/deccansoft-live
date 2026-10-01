@@ -1,0 +1,106 @@
+{
+ "taken": "2026-10-01T08:30:00+05:30",
+ "note": "Read from the AI-360 CRM (counts only) until its report endpoint is live.",
+ "rows": [
+  {
+   "day": "2026-09-22",
+   "ad": null,
+   "leads": 5,
+   "registered": 0,
+   "hot": 0,
+   "warm": 0,
+   "cold": 0,
+   "free_only": 2
+  },
+  {
+   "day": "2026-09-23",
+   "ad": null,
+   "leads": 33,
+   "registered": 0,
+   "hot": 3,
+   "warm": 0,
+   "cold": 8,
+   "free_only": 19
+  },
+  {
+   "day": "2026-09-24",
+   "ad": null,
+   "leads": 55,
+   "registered": 0,
+   "hot": 5,
+   "warm": 6,
+   "cold": 4,
+   "free_only": 37
+  },
+  {
+   "day": "2026-09-25",
+   "ad": null,
+   "leads": 38,
+   "registered": 0,
+   "hot": 3,
+   "warm": 7,
+   "cold": 5,
+   "free_only": 22
+  },
+  {
+   "day": "2026-09-26",
+   "ad": null,
+   "leads": 45,
+   "registered": 0,
+   "hot": 4,
+   "warm": 6,
+   "cold": 12,
+   "free_only": 23
+  },
+  {
+   "day": "2026-09-27",
+   "ad": null,
+   "leads": 54,
+   "registered": 0,
+   "hot": 3,
+   "warm": 3,
+   "cold": 8,
+   "free_only": 40
+  },
+  {
+   "day": "2026-09-28",
+   "ad": null,
+   "leads": 28,
+   "registered": 0,
+   "hot": 1,
+   "warm": 3,
+   "cold": 5,
+   "free_only": 19
+  },
+  {
+   "day": "2026-09-29",
+   "ad": null,
+   "leads": 66,
+   "registered": 0,
+   "hot": 9,
+   "warm": 9,
+   "cold": 4,
+   "free_only": 43
+  },
+  {
+   "day": "2026-09-30",
+   "ad": null,
+   "leads": 72,
+   "registered": 0,
+   "hot": 5,
+   "warm": 4,
+   "cold": 6,
+   "free_only": 57
+  },
+  {
+   "day": "2026-10-01",
+   "ad": null,
+   "leads": 9,
+   "registered": 0,
+   "hot": 2,
+   "warm": 1,
+   "cold": 2,
+   "free_only": 4
+  }
+ ]
+}

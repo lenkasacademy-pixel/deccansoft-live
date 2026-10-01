@@ -289,12 +289,13 @@ function barChart(svg, rows, label, series) {
 }
 
 const qOn = () => D.quality && D.quality.connected;
+const qHas = () => D.quality && (D.quality.connected || D.quality.snapshot);
 
 function quality() {
   const Q = D.quality, el = $("quality");
   if (!Q) { el.innerHTML = ""; $("qSub").textContent = ""; return; }
   $("qSub").textContent = "every CRM sign-up since " + dayLabel(Q.since) + " · IST days";
-  if (!Q.connected) {
+  if (!Q.connected && !Q.snapshot) {
     el.innerHTML = `<div class="card qoff">Not connected to the CRM yet (${esc(Q.error || "no data")}). The Meta numbers below are unaffected.</div>`;
     return;
   }
@@ -310,7 +311,7 @@ function quality() {
     ["CRM leads", num(t.leads), "", unrated ? `${num(unrated)} not rated (no start date)` : "all rated"],
   ];
   const fromAds = d => Object.entries(d.hotAds || {}).sort((a, b) => b[1] - a[1])
-    .map(([ad, n]) => `${esc(ad)}${n > 1 ? " ×" + n : ""}`).join(", ") || (d.hot ? "<span class=muted>not linked to an ad</span>" : "–");
+    .map(([ad, n]) => `${esc(ad)}${n > 1 ? " ×" + n : ""}`).join(", ") || (d.hot && !Q.snapshot ? "<span class=muted>not linked to an ad</span>" : "–");
   const last = Q.days.length - 1;
   el.innerHTML = `<div class="tiles">${tiles.map(([k, v, c, h]) => `<div class="card tile"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="h">${h}</div></div>`).join("")}</div>
   <div class="card scroll" style="margin-top:10px"><table>
@@ -322,7 +323,8 @@ function quality() {
       <td>${per(d.spend, d.hot)}</td><td class="from">${fromAds(d)}</td></tr>`).join("")}</tbody>
     <tfoot><tr><td class="l">All days</td><td>${inr(t.spend)}</td><td>${num(t.leads)}</td><td class="q-hot">${num(t.hot)}</td><td class="q-warm">${num(t.warm)}</td><td class="q-cold">${num(t.cold)}</td><td class="q-free">${num(t.free_only)}</td><td>${per(t.spend, t.hot)}</td><td></td></tr></tfoot>
   </table></div>
-  ${Q.unmatched && Q.unmatched.leads ? `<p class="qnote">${num(Q.unmatched.leads)} of these leads (${num(Q.unmatched.hot)} hot) are not linked to an ad, so they count in the days above but in no ad's row below. Until 1 Oct the CRM lost the ad of every webinar sign-up; leads from then on are linked.</p>` : ""}
+  ${!Q.snapshot && Q.unmatched && Q.unmatched.leads ? `<p class="qnote">${num(Q.unmatched.leads)} of these leads (${num(Q.unmatched.hot)} hot) are not linked to an ad, so they count in the days above but in no ad's row below. Until 1 Oct the CRM lost the ad of every webinar sign-up; leads from then on are linked.</p>` : ""}
+  ${Q.snapshot ? `<p class="qnote"><b>Snapshot from the CRM, ${new Date(Q.snapshot).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kolkata" })} IST.</b> Days after that show no sign-ups yet. It turns live, with the hot leads per ad, once the CRM update is deployed.</p>` : ""}
   <p class="qnote">Spend per day is the whole account's. The CRM credits a lead to the day they arrived (IST), Meta to the day of the click, so a single day can disagree slightly.</p>`;
 }
 

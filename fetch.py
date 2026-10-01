@@ -198,6 +198,13 @@ def main():
     ads.sort(key=lambda a: -a["spend"])
 
     rows, why_not = crm_report()
+    snapshot = None
+    if rows is None and os.path.exists("crm_snapshot.json"):
+        # Until the CRM endpoint is live: the last counts read from the CRM by
+        # hand, shown with their date. Per-day only; they name no ad.
+        with open("crm_snapshot.json") as f:
+            snapshot = json.load(f)
+        rows = snapshot["rows"]
     if rows is None:
         quality = {"connected": False, "since": CRM_SINCE, "error": why_not}
     else:
@@ -205,6 +212,8 @@ def main():
                              time_range=json.dumps({"since": AD_LINK_SINCE, "until": today}))
         quality = lead_quality(rows, daily, ads,
                                {r["ad_id"]: round(float(r.get("spend", 0)), 2) for r in since_rows})
+        if snapshot:
+            quality.update(connected=False, snapshot=snapshot["taken"], error=why_not)
 
     acct = get(ACCOUNT, fields="account_status,amount_spent,spend_cap")
     cap = int(acct.get("spend_cap") or 0)
