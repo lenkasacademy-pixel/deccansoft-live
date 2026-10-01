@@ -106,12 +106,14 @@ def lead_quality(rows, daily, ads, ad_spend_since):
     zero = lambda: {"leads": 0, "registered": 0, **{k: 0 for k in RATINGS}}  # noqa: E731
     by_day, by_ad = {}, {}
     for r in rows:
+        # ad is None for the day's leads no Meta ad's link brought (or whose
+        # tags the CRM lost before 1 Oct): they count for the day, not an ad.
         d = by_day.setdefault(r["day"], {**zero(), "hotAds": {}})
-        a = by_ad.setdefault(r["ad"], zero())
+        a = by_ad.setdefault(r["ad"] or "", zero())
         for k in ("leads", "registered", *RATINGS):
             d[k] += r[k]
             a[k] += r[k]
-        if r["hot"]:
+        if r["hot"] and r["ad"]:
             d["hotAds"][r["ad"]] = d["hotAds"].get(r["ad"], 0) + r["hot"]
     spend_by_day = {x["day"]: x for x in daily}
     days = []
