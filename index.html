@@ -117,6 +117,14 @@
   .bars rect { transition: opacity .15s; }
   .bars rect:hover { opacity: .75; }
   .today-cell { color: var(--text-3); font-size: 11px; display: block; }
+  /* Lead quality: the rating colours are semantic, not series colours. */
+  :root { --hot: #d03b3b; --warm: #e08a00; --cold: #2a78d6; --free: #8f8e86; }
+  .q-hot { color: var(--hot); } .q-warm { color: var(--warm); } .q-cold { color: var(--cold); } .q-free { color: var(--free); }
+  .tile .v.q-hot, .tile .v.q-warm, .tile .v.q-cold, .tile .v.q-free { font-weight: 700; }
+  td.from { text-align: left; white-space: normal; min-width: 180px; color: var(--text-2); font-size: 12px; }
+  .qnote { color: var(--text-3); font-size: 12px; margin: 8px 0 0; }
+  .qoff { color: var(--text-2); }
+  tr.part td { color: var(--text-3); }
 </style>
 <body>
 <div class="wrap">
@@ -142,6 +150,9 @@
   <h2>Quiz page vs Webinar page <small>since the start day · not a clean A/B: the quiz ad set optimises on Lead, the webinar ad set on CompleteRegistration</small></h2>
   <div class="split" id="split"></div>
 
+  <h2>Lead quality from the CRM <small id="qSub"></small></h2>
+  <div id="quality"></div>
+
   <h2>Per day <small>IST · today is a part-day</small></h2>
   <div class="card">
     <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Spend</span><span><i class="sw" style="background:var(--s3)"></i>Registrations</span><span><i class="sw" style="background:var(--s2)"></i>Leads</span></div>
@@ -151,10 +162,10 @@
   <h2>Today by hour <small>spend per hour, IST</small></h2>
   <div class="card"><svg class="chart bars" id="hourly" style="height:160px"></svg></div>
 
-  <h2>Ads <small>since the start day, with today underneath · click a heading to sort</small></h2>
+  <h2>Ads <small>since the start day, with today underneath · Hot / Warm / Cold and Cost/hot are from the CRM since 29 Sep · click a heading to sort</small></h2>
   <div class="card scroll"><table id="ads"></table></div>
 
-  <footer>Source: Meta Marketing API, ad account <span id="acct"></span>, read-only. Leads = Meta "lead" action, registrations = "complete_registration", clicks = link clicks, both attributed to the ads by Meta (default attribution). Meta revises the last ~48 hours as late conversions arrive.</footer>
+  <footer>Source: Meta Marketing API, ad account <span id="acct"></span>, read-only. Leads = Meta "lead" action, registrations = "complete_registration", clicks = link clicks, both attributed to the ads by Meta (default attribution). Meta revises the last ~48 hours as late conversions arrive. Hot / warm / cold come from the AI-360 CRM: each lead is rated from the budget and start date they gave (hot = ₹15,000+ and ready now), and credited to the ad whose link they first arrived through. Counts only; no person is shown.</footer>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -277,19 +288,66 @@ function barChart(svg, rows, label, series) {
   svg.onmouseleave = () => ($("tip").hidden = true);
 }
 
+const qOn = () => D.quality && D.quality.connected;
+
+function quality() {
+  const Q = D.quality, el = $("quality");
+  if (!Q) { el.innerHTML = ""; $("qSub").textContent = ""; return; }
+  $("qSub").textContent = "since " + dayLabel(Q.since) + ", when the CRM started recording each lead's ad · IST days";
+  if (!Q.connected) {
+    el.innerHTML = `<div class="card qoff">Not connected to the CRM yet (${esc(Q.error || "no data")}). The Meta numbers below are unaffected.</div>`;
+    return;
+  }
+  const t = { spend: 0, leads: 0, hot: 0, warm: 0, cold: 0, free_only: 0 };
+  Q.days.forEach(d => { for (const k in t) t[k] += d[k] || 0; });
+  const unrated = t.leads - t.hot - t.warm - t.cold - t.free_only;
+  const tiles = [
+    ["Hot leads", num(t.hot), "q-hot", `${pct(t.hot, t.leads)} of CRM leads`],
+    ["Cost / hot lead", per(t.spend, t.hot), "", `${inr(t.spend)} spent since ${dayLabel(Q.since)}`],
+    ["Warm", num(t.warm), "q-warm", per(t.spend, t.hot + t.warm) + " per hot or warm"],
+    ["Cold", num(t.cold), "q-cold", pct(t.cold, t.leads) + " of CRM leads"],
+    ["Free-only", num(t.free_only), "q-free", "want free resources only"],
+    ["CRM leads from ads", num(t.leads), "", unrated ? `${num(unrated)} not rated (no start date)` : "all rated"],
+  ];
+  const fromAds = d => Object.entries(d.hotAds || {}).sort((a, b) => b[1] - a[1])
+    .map(([ad, n]) => `${esc(ad)}${n > 1 ? " ×" + n : ""}`).join(", ") || "–";
+  const last = Q.days.length - 1;
+  el.innerHTML = `<div class="tiles">${tiles.map(([k, v, c, h]) => `<div class="card tile"><div class="k">${k}</div><div class="v ${c}">${v}</div><div class="h">${h}</div></div>`).join("")}</div>
+  <div class="card scroll" style="margin-top:10px"><table>
+    <thead><tr><th class="l">Day</th><th>Spend</th><th>CRM leads</th><th class="q-hot">Hot</th><th class="q-warm">Warm</th><th class="q-cold">Cold</th><th class="q-free">Free-only</th><th>Cost / hot</th><th class="l">Hot leads came from</th></tr></thead>
+    <tbody>${Q.days.slice().reverse().map((d, i) => `<tr class="${i === 0 && d.day === Q.days[last].day ? "part" : ""}">
+      <td class="l">${dayLabel(d.day)}${i === 0 ? " <span class=muted>(so far)</span>" : ""}</td>
+      <td>${inr(d.spend)}</td><td>${num(d.leads)}</td>
+      <td class="q-hot">${num(d.hot)}</td><td class="q-warm">${num(d.warm)}</td><td class="q-cold">${num(d.cold)}</td><td class="q-free">${num(d.free_only)}</td>
+      <td>${per(d.spend, d.hot)}</td><td class="from">${fromAds(d)}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td class="l">All days</td><td>${inr(t.spend)}</td><td>${num(t.leads)}</td><td class="q-hot">${num(t.hot)}</td><td class="q-warm">${num(t.warm)}</td><td class="q-cold">${num(t.cold)}</td><td class="q-free">${num(t.free_only)}</td><td>${per(t.spend, t.hot)}</td><td></td></tr></tfoot>
+  </table></div>
+  ${Q.unmatched && Q.unmatched.leads ? `<p class="qnote">${num(Q.unmatched.leads)} CRM leads (${num(Q.unmatched.hot)} hot) came through an ad link whose name is not in this account's ad list, so they count above but not in any ad's row below.</p>` : ""}
+  <p class="qnote">Spend per day is the whole account's. The CRM credits a lead to the day they arrived (IST), Meta to the day of the click, so a single day can disagree slightly.</p>`;
+}
+
 const COLS = [
   ["name", "Ad", "l"], ["status", "Status", "l"], ["spend", "Spend"], ["regs", "Regs"], ["leads", "Leads"],
   ["cpr", "Cost/reg"], ["clicks", "Clicks"], ["lpv", "Page views"], ["ctr", "CTR"], ["impr", "Impr."],
 ];
+const QCOLS = [["hot", "Hot", "q-hot"], ["warm", "Warm", "q-warm"], ["cold", "Cold", "q-cold"], ["cph", "Cost/hot"]];
 function adsTable() {
-  const rows = D.ads.map(a => ({ ...a, cpr: a.regs ? a.spend / a.regs : Infinity, ctr: a.impr ? a.clicks / a.impr : 0 }));
+  const q = qOn(), cols = q ? COLS.concat(QCOLS) : COLS;
+  const rows = D.ads.map(a => {
+    const c = a.crm || {};
+    return { ...a, cpr: a.regs ? a.spend / a.regs : Infinity, ctr: a.impr ? a.clicks / a.impr : 0,
+      hot: c.hot || 0, warm: c.warm || 0, cold: c.cold || 0, cph: c.hot ? c.spendSince / c.hot : Infinity };
+  });
   rows.sort((a, b) => {
     const x = a[sortKey], y = b[sortKey];
     return (typeof x === "string" ? x.localeCompare(y) : x - y) * sortDir;
   });
   const td = (v, t) => `<td>${v}${t !== undefined ? `<span class="today-cell">${t}</span>` : ""}</td>`;
   const tot = sum(D.ads), tt = sum(D.ads, "today");
-  $("ads").innerHTML = `<thead><tr>${COLS.map(([k, l, c]) => `<th class="${c || ""}" data-k="${k}">${l}${k === sortKey ? (sortDir < 0 ? " ↓" : " ↑") : ""}</th>`).join("")}</tr></thead>
+  const qt = { hot: 0, warm: 0, cold: 0, spend: 0 };
+  if (q) D.ads.forEach(a => { const c = a.crm || {}; qt.hot += c.hot || 0; qt.warm += c.warm || 0; qt.cold += c.cold || 0; qt.spend += c.spendSince || 0; });
+  const qcells = a => q ? `<td class="q-hot">${a.hot || "·"}</td><td class="q-warm">${a.warm || "·"}</td><td class="q-cold">${a.cold || "·"}</td><td>${a.hot ? inr(a.cph) : "–"}</td>` : "";
+  $("ads").innerHTML = `<thead><tr>${cols.map(([k, l, c]) => `<th class="${c || ""}" data-k="${k}">${l}${k === sortKey ? (sortDir < 0 ? " ↓" : " ↑") : ""}</th>`).join("")}</tr></thead>
   <tbody>${rows.map(a => `<tr>
     <td class="ad">${a.img ? `<img src="${esc(a.img)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="ph"></span>`}<div>${esc(a.name)}<small>${esc(a.adset)}</small></div></td>
     <td class="l status">${esc(a.status.toLowerCase().replace(/_/g, " "))}</td>
@@ -301,11 +359,12 @@ function adsTable() {
     ${td(num(a.lpv))}
     ${td(pct(a.clicks, a.impr))}
     ${td(num(a.impr))}
+    ${qcells(a)}
   </tr>`).join("")}</tbody>
-  <tfoot><tr><td class="l">All ads</td><td></td>${td(inr(tot.spend), inr(tt.spend) + " today")}${td(tot.regs, tt.regs)}${td(tot.leads, tt.leads)}${td(per(tot.spend, tot.regs))}${td(num(tot.clicks))}${td(num(tot.lpv))}${td(pct(tot.clicks, tot.impr))}${td(num(tot.impr))}</tr></tfoot>`;
+  <tfoot><tr><td class="l">All ads</td><td></td>${td(inr(tot.spend), inr(tt.spend) + " today")}${td(tot.regs, tt.regs)}${td(tot.leads, tt.leads)}${td(per(tot.spend, tot.regs))}${td(num(tot.clicks))}${td(num(tot.lpv))}${td(pct(tot.clicks, tot.impr))}${td(num(tot.impr))}${q ? `<td class="q-hot">${qt.hot}</td><td class="q-warm">${qt.warm}</td><td class="q-cold">${qt.cold}</td><td>${per(qt.spend, qt.hot)}</td>` : ""}</tr></tfoot>`;
   $("ads").querySelectorAll("th").forEach(th => th.onclick = () => {
     const k = th.dataset.k;
-    sortDir = k === sortKey ? -sortDir : (k === "name" || k === "status" || k === "cpr" ? 1 : -1);
+    sortDir = k === sortKey ? -sortDir : (k === "name" || k === "status" || k === "cpr" || k === "cph" ? 1 : -1);
     sortKey = k; adsTable();
   });
 }
@@ -324,6 +383,7 @@ function render() {
   tiles("todayTiles", D.today, D.yesterdaySoFar, D.yesterday);
   tiles("totalTiles", D.total);
   split();
+  quality();
   const S = [{ k: "spend", c: "var(--s1)" }, { k: "regs", c: "var(--s3)" }, { k: "leads", c: "var(--s2)" }];
   barChart($("daily"), D.daily, (r, long) => long ? dayLabel(r.day) + (r === D.daily[D.daily.length - 1] ? " (so far)" : "") : dayLabel(r.day), S);
   const hours = Array.from({ length: 24 }, (_, h) => D.hourly.find(x => x.hour === h) || { hour: h, spend: 0, impr: 0, clicks: 0, leads: 0, regs: 0 });

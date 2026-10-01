@@ -21,6 +21,8 @@ jobs:
       - name: Pull from Meta
         env:
           META_TOKEN: ${{ secrets.META_TOKEN }}
+          # Counts-only lead quality from the AI-360 CRM; unset = the page says "not connected".
+          CRM_REPORT_KEY: ${{ secrets.CRM_REPORT_KEY }}
         run: python3 fetch.py
       # data.json lives alone on the `data` branch, force-pushed as a single commit:
       # no history piles up and main (the Pages site) is never rebuilt.
