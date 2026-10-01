@@ -26,10 +26,12 @@ CRM_API = os.environ.get(
     "CRM_API", "https://ai-360-api-crm-gsazh5gwaua0f9c6.centralindia-01.azurewebsites.net/api"
 ).rstrip("/")
 CRM_KEY = os.environ.get("CRM_REPORT_KEY", "").strip()
-# The CRM recorded which ad brought each lead from this day on; earlier leads
-# have no ad and can never get one. Every cost per hot lead uses spend from
-# here too, so the two sides cover the same days.
-CRM_SINCE = "2026-09-29"
+# Ratings exist for every lead, so the per-day lead quality starts with the
+# report. Which ad brought a lead is another matter: webinar leads only carry
+# it once the CRM fix is live, so an ad's cost per hot lead uses its spend from
+# AD_LINK_SINCE on, the day the CRM began storing ads at all.
+CRM_SINCE = START_DAY
+AD_LINK_SINCE = "2026-09-29"
 RATINGS = ("hot", "warm", "cold", "free_only")
 
 FIELDS = "spend,impressions,reach,inline_link_clicks,actions"
@@ -200,7 +202,7 @@ def main():
         quality = {"connected": False, "since": CRM_SINCE, "error": why_not}
     else:
         since_rows = get_all(f"{ACCOUNT}/insights", level="ad", limit=200, fields="ad_id,spend",
-                             time_range=json.dumps({"since": CRM_SINCE, "until": today}))
+                             time_range=json.dumps({"since": AD_LINK_SINCE, "until": today}))
         quality = lead_quality(rows, daily, ads,
                                {r["ad_id"]: round(float(r.get("spend", 0)), 2) for r in since_rows})
 

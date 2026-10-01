@@ -162,7 +162,7 @@
   <h2>Today by hour <small>spend per hour, IST</small></h2>
   <div class="card"><svg class="chart bars" id="hourly" style="height:160px"></svg></div>
 
-  <h2>Ads <small>since the start day, with today underneath · Hot / Warm / Cold and Cost/hot are from the CRM since 29 Sep · click a heading to sort</small></h2>
+  <h2>Ads <small>since the start day, with today underneath · Hot / Warm / Cold are CRM leads linked to the ad (only recorded for webinar sign-ups once the CRM fix is live) · click a heading to sort</small></h2>
   <div class="card scroll"><table id="ads"></table></div>
 
   <footer>Source: Meta Marketing API, ad account <span id="acct"></span>, read-only. Leads = Meta "lead" action, registrations = "complete_registration", clicks = link clicks, both attributed to the ads by Meta (default attribution). Meta revises the last ~48 hours as late conversions arrive. Hot / warm / cold come from the AI-360 CRM: each lead is rated from the budget and start date they gave (hot = ₹15,000+ and ready now), and credited to the ad whose link they first arrived through. Counts only; no person is shown.</footer>
@@ -293,7 +293,7 @@ const qOn = () => D.quality && D.quality.connected;
 function quality() {
   const Q = D.quality, el = $("quality");
   if (!Q) { el.innerHTML = ""; $("qSub").textContent = ""; return; }
-  $("qSub").textContent = "since " + dayLabel(Q.since) + ", when the CRM started recording each lead's ad · IST days";
+  $("qSub").textContent = "every CRM sign-up since " + dayLabel(Q.since) + " · IST days";
   if (!Q.connected) {
     el.innerHTML = `<div class="card qoff">Not connected to the CRM yet (${esc(Q.error || "no data")}). The Meta numbers below are unaffected.</div>`;
     return;
